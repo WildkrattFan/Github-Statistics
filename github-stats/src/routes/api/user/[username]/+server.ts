@@ -3,8 +3,8 @@ import type { repositroy, user, GitHubRepo, projectLang } from "$lib/types";
 import { server } from "$lib/mocks/node";
 
 export const GET: RequestHandler = async ({ params }) => {
-    console.log("GET request received for user data");
-    const username = params.username;
+    const {username} = params;
+    console.log(username)
     if (!username) {
         return new Response(JSON.stringify({ error: "Username parameter is missing" }), {
             status: 400,
@@ -12,7 +12,8 @@ export const GET: RequestHandler = async ({ params }) => {
         });
     }
     const userData = await getUsernameData(username);
-    return new Response(JSON.stringify(username), {
+    console.log(userData)
+    return new Response(JSON.stringify(userData), {
         status: 200,
         headers: { "Content-Type": "application/json" }
     });
@@ -39,7 +40,12 @@ async function getUsernameData(username: string) {
         return user;
     }
     else {
-        console.log("boo")
+        server.listen()
+        const res = await fetch(`https://api.mockuser.com/users/${username}/repos`)
+
+        const data = await res.json()
+        console.log("data")
+        console.log(data)
     }
 }
 
