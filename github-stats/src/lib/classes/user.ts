@@ -10,5 +10,8 @@ export class User {
 
     addToLangs(langs: projectLang[]): void {
         //TODO: Implement
+        langs.forEach((lang: projectLang) =>{
+            
+        }) 
     }
 }

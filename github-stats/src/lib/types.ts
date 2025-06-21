@@ -15,7 +15,7 @@ export type repositroy = {
     langs: projectLang[] | null
 }
 
-type projectLang = {
+export type projectLang = {
     name: String,
     lines: Number
 }

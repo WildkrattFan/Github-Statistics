@@ -1,10 +1,15 @@
 import type { PageServerLoad } from '../$types';
-import { getUsernameData } from '$lib/utils/github/userAPIAcess';
 
-export const load = (async ({params}) => {
-    let { username } = params;
+
+
+export const load = (async ({params, fetch}) => {
+    let username = params["username"]
     console.log("username == " + username);
-    let data = await getUsernameData(username);
+    let res = await fetch(`/api/user/${encodeURIComponent(username)}`, {
+        method: 'GET',
+
+    });
+    let data = await res.json();
     return {};
 }) satisfies PageServerLoad;
 
