@@ -2,9 +2,10 @@ import type { RequestHandler } from '@sveltejs/kit';
 import type { repositroy, user, GitHubRepo, projectLang } from "$lib/types";
 import { server } from "$lib/mocks/node";
 
+
 export const GET: RequestHandler = async ({ params }) => {
     const {username} = params;
-    console.log(username)
+    // console.log(username)
     if (!username) {
         return new Response(JSON.stringify({ error: "Username parameter is missing" }), {
             status: 400,
@@ -12,7 +13,7 @@ export const GET: RequestHandler = async ({ params }) => {
         });
     }
     const userData = await getUsernameData(username);
-    console.log(userData)
+    // console.log(userData)
     return new Response(JSON.stringify(userData), {
         status: 200,
         headers: { "Content-Type": "application/json" }
@@ -44,12 +45,18 @@ async function getUsernameData(username: string) {
         const res = await fetch(`https://api.mockuser.com/users/${username}/repos`)
 
         const data = await res.json()
-        console.log("data")
-        console.log(data)
+        // console.log("data")
+        // console.log(data)
+        const user = await organizeData(data, username) as user
+        // console.log("organized user data faked")
+        // console.log(user.repositories)
+        server.close()
     }
 }
 
 async function getRepoLangs(langUrl: string) {
+
+
     const res = await fetch(langUrl, {
         method: "GET",
         headers: {
@@ -57,9 +64,11 @@ async function getRepoLangs(langUrl: string) {
         }
     });
     const data = await res.json() as projectLang[]
-
+    console.log(data)
 
     return data;
+
+
 }
 
 async function organizeData(repos: GitHubRepo[], username: String) {
