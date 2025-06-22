@@ -4,16 +4,20 @@ import { server } from "$lib/mocks/node";
 import { User } from '$lib/classes/user';
 
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, locals }) => {
     const {username} = params;
     // console.log(username)
+    // console.log("getting user data for " + username)
+    const session = await locals.auth();
+    // console.log("session user is")
+    // console.log(session)
     if (!username) {
         return new Response(JSON.stringify({ error: "Username parameter is missing" }), {
             status: 400,
             headers: { "Content-Type": "application/json" }
         });
     }
-    const userData = await getUsernameData(username);
+    const userData = await getUsernameData(username, session);
     // console.log(userData)
     return new Response(JSON.stringify(userData), {
         status: 200,
@@ -24,21 +28,26 @@ export const GET: RequestHandler = async ({ params }) => {
 
 
 
-async function getUsernameData(username: string) {
+async function getUsernameData(username: string, session: any) {
 
 
-    
-    if (process.env.ENVIRONMENT == "prod") {
+    console.log("access token in getUsernameData")
+    console.log(session?.access_token)
+    if (process.env.ENVIRONMENT == "prod" || true) {
         const res = await fetch(`https://api.github.com/users/${username}/repos`, {
             method: "GET",
             headers: {
+                Authorization: `Bearer ${session?.access_token}`,
                 Accept: "application/json"
             }
         });
+        let response = await res.json();
+        console.log("response:")
+        console.log(response)
 
-        const data = await res.json() as GitHubRepo[]
+        const data = response as GitHubRepo[]
 
-        const user = await organizeData(data, username, data[0].owner.avatar_url);
+        const user = await organizeData(data, username, data[0].owner.avatar_url, session);
 
         return user;
     }
@@ -55,12 +64,14 @@ async function getUsernameData(username: string) {
     }
 }
 
-async function getRepoLangs(langUrl: string, userObj: User) {
+async function getRepoLangs(langUrl: string, userObj: User, session?: anu) {
 
-
+    console.log("access token in getRepoLangs")
+    console.log(session?.access_token)
     const res = await fetch(langUrl, {
         method: "GET",
         headers: {
+            Authorization: `Bearer ${session?.access_token}`,
             Accept: "application/json"
         }
     });
@@ -73,14 +84,14 @@ async function getRepoLangs(langUrl: string, userObj: User) {
 
 }
 
-async function organizeData(repos: GitHubRepo[], username: string, avatar_url: string) {
+async function organizeData(repos: GitHubRepo[], username: string, avatar_url: string, session?: any) {
 
     let userObj = new User(username);
 
     let user: user = { name: username,avatar: avatar_url, repositories: null, languages: null };
 
     const repoList = await Promise.all(repos.map(async (repo: GitHubRepo) => {
-        let projectLangs = await getRepoLangs(repo.languages_url, userObj);
+        let projectLangs = await getRepoLangs(repo.languages_url, userObj, session);
 
         let newRepo: repositroy = {
             name: repo.name,

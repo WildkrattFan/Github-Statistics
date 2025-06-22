@@ -2,15 +2,22 @@ import type { PageServerLoad } from '../$types';
 import { redirect } from '@sveltejs/kit';
 
 
-export const load = (async ({ params, fetch }) => {
+export const load = (async ({ params, fetch, locals }) => {
     let username = params.username
+    
+
     try{
+    const session = await locals.auth();
+    if (!session?.user) throw redirect(303, '/auth');
+    // console.log("session user is")
+    // console.log(session)
+
     let res = await fetch(`/api/user/${encodeURIComponent(username)}`, {
         method: 'GET',
 
     });
     let userData = await res.json();
-    console.log(userData)
+    // console.log(userData)
     return {
         userData
     };
@@ -21,7 +28,6 @@ export const load = (async ({ params, fetch }) => {
         redirect(404, "/error");
     }
 
-    
 }) satisfies PageServerLoad;
 
 
