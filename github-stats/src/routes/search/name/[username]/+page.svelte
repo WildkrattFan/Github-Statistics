@@ -5,7 +5,7 @@
 
     let { data }: { data: PageData } = $props();
     let userData = data.userData as user;
-    console.log(userData);
+    // console.log(userData);
     let processedLangs = calculateLangPercent(userData.languages || []);
     let filteredLangs = $state(processedLangs);
     
@@ -265,6 +265,7 @@
     .repo-boxes {
         display: flex;
         justify-content: space-around;
+        flex-wrap: wrap;
     }
     .repo-box {
         max-width: 20%;
