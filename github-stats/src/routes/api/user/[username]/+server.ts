@@ -28,7 +28,7 @@ async function getUsernameData(username: string) {
 
 
     
-    if (process.env.ENVIRONMENT == "prod") {
+    if (process.env.ENVIRONMENT == "prod" || true) {
         const res = await fetch(`https://api.github.com/users/${username}/repos`, {
             method: "GET",
             headers: {
@@ -97,7 +97,8 @@ async function organizeData(repos: GitHubRepo[], username: String) {
 
 
 
-    console.log(userObj.getLangsArray())
+    // console.log(userObj.getLangsArray())
     user.repositories = repoList
+    user.languages = userObj.getLangsArray();
     return user;
 }

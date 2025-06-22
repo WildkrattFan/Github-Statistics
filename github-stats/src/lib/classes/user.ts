@@ -1,4 +1,4 @@
-import type { repositroy, user, GitHubRepo, projectLang } from "$lib/types";
+import type { repositroy, user, GitHubRepo, projectLang, codingLang } from "$lib/types";
 
 export class User {
     private username: String;
@@ -26,10 +26,10 @@ export class User {
         return this.languages;
     }
     //Object.entries(jsonData).map(([name, lines]) => ({name, lines})) as projectLang[];
-    getLangsArray(): projectLang[]{
-        const langArray: projectLang[] = [];
-        Object.assign(this.languages, langArray)
-        console.log(langArray)
+    getLangsArray(): codingLang[]{
+        const langArray: codingLang[] = Object.entries(this.languages).map(([name, lines]) => ({ name, lines } as codingLang));
+        console.log("Languages Array: ");
+        console.log(langArray);
         return langArray;
     }
 }

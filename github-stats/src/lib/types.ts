@@ -22,7 +22,7 @@ export type projectLang = {
 
 
 
-type codingLang = {
+export type codingLang = {
     name: string,
     lines: number,
     repos: repositroy[],
