@@ -1,6 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import type { repositroy, user, GitHubRepo, projectLang } from "$lib/types";
 import { server } from "$lib/mocks/node";
+import { User } from '$lib/classes/user';
 
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -24,6 +25,8 @@ export const GET: RequestHandler = async ({ params }) => {
 
 
 async function getUsernameData(username: string) {
+
+
     
     if (process.env.ENVIRONMENT == "prod") {
         const res = await fetch(`https://api.github.com/users/${username}/repos`, {
@@ -36,8 +39,7 @@ async function getUsernameData(username: string) {
         const data = await res.json() as GitHubRepo[]
 
         const user = await organizeData(data, username);
-        console.log("organized user data")
-        console.log(user);
+
         return user;
     }
     else {
@@ -45,16 +47,15 @@ async function getUsernameData(username: string) {
         const res = await fetch(`https://api.mockuser.com/users/${username}/repos`)
 
         const data = await res.json()
-        // console.log("data")
-        // console.log(data)
+
         const user = await organizeData(data, username) as user
-        // console.log("organized user data faked")
-        // console.log(user.repositories)
+        
         server.close()
+        return user
     }
 }
 
-async function getRepoLangs(langUrl: string) {
+async function getRepoLangs(langUrl: string, userObj: User) {
 
 
     const res = await fetch(langUrl, {
@@ -63,8 +64,9 @@ async function getRepoLangs(langUrl: string) {
             Accept: "application/json"
         }
     });
-    const data = await res.json() as projectLang[]
-    console.log(data)
+    const jsonData = await res.json();
+    const data = Object.entries(jsonData).map(([name, lines]) => ({name, lines})) as projectLang[];
+    userObj.addToLangs(data)
 
     return data;
 
@@ -73,10 +75,12 @@ async function getRepoLangs(langUrl: string) {
 
 async function organizeData(repos: GitHubRepo[], username: String) {
 
+    let userObj = new User(username);
+
     let user: user = { name: username, repositories: null, languages: null };
 
     const repoList = await Promise.all(repos.map(async (repo: GitHubRepo) => {
-        let projectLangs = await getRepoLangs(repo.languages_url);
+        let projectLangs = await getRepoLangs(repo.languages_url, userObj);
 
         let newRepo: repositroy = {
             name: repo.name,
@@ -91,6 +95,9 @@ async function organizeData(repos: GitHubRepo[], username: String) {
 
     }))
 
+
+
+    console.log(userObj.getLangsArray())
     user.repositories = repoList
     return user;
 }

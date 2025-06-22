@@ -6,25 +6,25 @@ export type user = {
 
 
 export type repositroy = {
-    name: String,
-    description: String | null,
-    created_at: String,
-    updated_at: String,
-    pushed_at: String,
-    URL: String,
+    name: string,
+    description: string | null,
+    created_at: string,
+    updated_at: string,
+    pushed_at: string,
+    URL: string,
     langs: projectLang[] | null
 }
 
 export type projectLang = {
-    name: String,
-    lines: Number
+    name: string,
+    lines: number
 }
 
 
 
 type codingLang = {
-    name: String,
-    lines: Number,
+    name: string,
+    lines: number,
     repos: repositroy[],
 }
 
