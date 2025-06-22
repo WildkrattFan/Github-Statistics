@@ -28,7 +28,7 @@ async function getUsernameData(username: string) {
 
 
     
-    if (process.env.ENVIRONMENT == "prod" || true) {
+    if (process.env.ENVIRONMENT == "prod") {
         const res = await fetch(`https://api.github.com/users/${username}/repos`, {
             method: "GET",
             headers: {
@@ -38,7 +38,7 @@ async function getUsernameData(username: string) {
 
         const data = await res.json() as GitHubRepo[]
 
-        const user = await organizeData(data, username);
+        const user = await organizeData(data, username, data[0].owner.avatar_url);
 
         return user;
     }
@@ -46,9 +46,9 @@ async function getUsernameData(username: string) {
         server.listen()
         const res = await fetch(`https://api.mockuser.com/users/${username}/repos`)
 
-        const data = await res.json()
+        const data = await res.json() as GitHubRepo[]
 
-        const user = await organizeData(data, username) as user
+        const user = await organizeData(data, username, data[0].owner.avatar_url) as user
         
         server.close()
         return user
@@ -73,11 +73,11 @@ async function getRepoLangs(langUrl: string, userObj: User) {
 
 }
 
-async function organizeData(repos: GitHubRepo[], username: String) {
+async function organizeData(repos: GitHubRepo[], username: string, avatar_url: string) {
 
     let userObj = new User(username);
 
-    let user: user = { name: username, repositories: null, languages: null };
+    let user: user = { name: username,avatar: avatar_url, repositories: null, languages: null };
 
     const repoList = await Promise.all(repos.map(async (repo: GitHubRepo) => {
         let projectLangs = await getRepoLangs(repo.languages_url, userObj);
@@ -88,7 +88,7 @@ async function organizeData(repos: GitHubRepo[], username: String) {
             created_at: repo.created_at,
             updated_at: repo.updated_at,
             pushed_at: repo.pushed_at,
-            URL: repo.url,
+            URL: repo.html_url,
             langs: projectLangs
         }
         return newRepo

@@ -1,5 +1,6 @@
 export type user = {
-    name: String,
+    name: string,
+    avatar: string
     repositories: repositroy[] | null,
     languages: codingLang[] | null,
 }
@@ -17,7 +18,8 @@ export type repositroy = {
 
 export type projectLang = {
     name: string,
-    lines: number
+    lines: number,
+    percent: number | null
 }
 
 

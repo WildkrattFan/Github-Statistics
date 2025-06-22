@@ -2,8 +2,8 @@ import type { PageServerLoad } from '../$types';
 import { redirect } from '@sveltejs/kit';
 
 
-export const load = (async ({params, fetch}) => {
-    let username = params["username"]
+export const load = (async ({ params, fetch }) => {
+    let username = params.username
     try{
     let res = await fetch(`/api/user/${encodeURIComponent(username)}`, {
         method: 'GET',
