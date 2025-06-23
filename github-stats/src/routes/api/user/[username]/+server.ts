@@ -83,14 +83,27 @@ async function getRepoLangs(langUrl: string, userObj: User, session?: any) {
 
     // console.log("access token in getRepoLangs")
     // console.log(session?.access_token)
+    let res;
     try {
-        const res = await fetch(langUrl, {
+        if (env.ENVIRONMENT && env.ENVIRONMENT == "prod") {
+            // console.log("fetching from github api")
+            // console.log(langUrl
+         res = await fetch(langUrl, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session?.access_token}`,
                 Accept: "application/json"
             }
         });
+    }
+    else{
+         res = await fetch(langUrl, {
+            method: "GET",
+            headers: {
+                Accept: "application/json"
+            }
+        });
+    }
         const jsonData = await res.json();
         const data = Object.entries(jsonData).map(([name, lines]) => ({ name, lines })) as projectLang[];
         userObj.addToLangs(data)
