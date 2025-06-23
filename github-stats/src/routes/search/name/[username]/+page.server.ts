@@ -1,4 +1,4 @@
-import type { PageServerLoad } from '../$types';
+import type { PageServerLoad } from './$types';
 import { isRedirect, redirect, error } from '@sveltejs/kit';
   import { signIn, signOut } from "@auth/sveltekit/client";
   import type { user } from '$lib/types';
