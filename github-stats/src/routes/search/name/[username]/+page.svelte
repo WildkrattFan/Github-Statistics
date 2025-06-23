@@ -6,9 +6,11 @@
 
     let { data }: { data: PageData } = $props();
     let userData = data.userData as user;
-
+    
     let processedLangs = calculateLangPercent(userData.languages || []);
     let filteredLangs = $state(processedLangs);
+    
+    //Check if the userData is resolved and if it does
     
     // Ensure each repo's langs are processed to include percent
     if (userData.repositories) {
@@ -132,6 +134,9 @@
     
 </div>
 
+{#await data.userData}
+<p>Loading some data</p>
+{:then userData}
 <main>
     <div class="userHeader">
         <img class="avatar" src={data.userData.avatar} alt="User PFP " />
@@ -214,6 +219,9 @@
         </div>
     </div>
 </main>
+{:catch error}
+<p>Error loading user data: {error.message}</p>
+{/await}
 
 <style>
     main {
@@ -394,13 +402,80 @@
     @media (max-width: 600px) {
         .card {
             padding: 1rem;
+            width: 100%;
+            min-width: unset;
+            max-width: 98vw;
         }
         .userHeader {
             flex-direction: column;
             align-items: flex-start;
+            gap: 0.5rem;
+        }
+        .avatar {
+            width: 56px;
+            height: 56px;
+        }
+        .username {
+            font-size: 1.2rem;
+        }
+        .repo-header {
+            font-size: 1.1rem;
+        }
+        .repo-boxes {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .repo-box {
+            min-width: 90vw;
+            max-width: 98vw;
+            padding: 1rem;
+            margin-bottom: 1rem;
         }
         .lang-bar {
-            height: 28px;
+            height: 24px;
+            max-width: 100%;
+            margin-bottom: 1rem;
+        }
+        .lang-header {
+            font-size: 1.1rem;
+        }
+        .lang-filter {
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.5rem 0.5rem;
+        }
+        .filter-label {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .nav-bar {
+            flex-direction: column;
+            gap: 1em;
+            padding: 0.5em 0.5em;
+            font-size: 1rem;
+        }
+        .home-link {
+            font-size: 1.2em;
+        }
+        .search-bar {
+            width: 100%;
+            min-width: unset;
+            max-width: 98vw;
+            margin-right: 0;
+            padding: 0.2em 0.2em 0.2em 0.5em;
+        }
+        .search-bar input {
+            font-size: 1em;
+            padding: 0.4em 0.6em;
+            min-width: 0;
+            width: 60vw;
+        }
+        .search-bar button {
+            font-size: 1em;
+            padding: 0.4em 0.8em;
+        }
+        .Repos {
+            padding: 0 0.5em;
         }
     }
     

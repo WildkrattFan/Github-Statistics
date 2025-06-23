@@ -1,6 +1,7 @@
 import type { PageServerLoad } from '../$types';
 import { isRedirect, redirect, error } from '@sveltejs/kit';
   import { signIn, signOut } from "@auth/sveltekit/client";
+  import type { user } from '$lib/types';
 
 
 export const load = (async ({ params, fetch, locals }) => {
@@ -12,15 +13,16 @@ export const load = (async ({ params, fetch, locals }) => {
     if (!session?.user) throw redirect(303, '/');
 
 
-    let res = await fetch(`/api/user/${encodeURIComponent(username)}`, {
+    let userData: Promise<user> = fetch(`/api/user/${encodeURIComponent(username)}`, {
         method: 'GET',
-
+    }).then(async(res) =>{
+        if(res.status !== 200){
+            const errData = await res.json();
+            throw error(res.status, errData?.error || 'Failed to load user data');
+        }
+        return res.json();
     });
-    if (res.status !== 200) {
-        const errData = await res.json();
-        throw error(res.status, errData?.error || 'Failed to load user data');
-    }
-    let userData = await res.json();
+
 
     return {
         userData
