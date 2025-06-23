@@ -1,4 +1,4 @@
-import type { RequestHandler } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
 import type { repositroy, user, GitHubRepo, projectLang } from "$lib/types";
 import { server } from "$lib/mocks/node";
 import { User } from '$lib/classes/user';
@@ -7,11 +7,6 @@ import { env } from '$env/dynamic/private';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
     const { username } = params;
-    // console.log(username)
-    // console.log("getting user data for " + username)
-    const session = await locals.auth();
-    // console.log("session user is")
-    // console.log(session)
     if (!username) {
         return new Response(JSON.stringify({ error: "Username parameter is missing" }), {
             status: 400,
@@ -19,21 +14,25 @@ export const GET: RequestHandler = async ({ params, locals }) => {
         });
     }
     try {
-        const userData = await getUsernameData(username, session);
-        // console.log(userData)
+        const userData = await getUsernameData(username, await locals.auth());
+        if (!userData || !userData.name) {
+            return new Response(JSON.stringify({ error: "User not found" }), {
+                status: 404,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
         return new Response(JSON.stringify(userData), {
             status: 200,
             headers: { "Content-Type": "application/json" }
         });
-    }
-    catch (err) {
-        return new Response(JSON.stringify({ error: "User not found or an error occurred" }), {
+    } catch (err: any) {
+        // Always return a JSON error object
+        return new Response(JSON.stringify({ error: err?.message || "User not found or an error occurred" }), {
             status: 404,
             headers: { "Content-Type": "application/json" }
         });
     }
 };
-
 
 
 
