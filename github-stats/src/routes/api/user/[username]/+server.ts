@@ -39,8 +39,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 async function getUsernameData(username: string, session: any) {
 
 
-    // console.log("access token in getUsernameData")
-    // console.log(session?.access_token)
+
     try {
         if (env.ENVIRONMENT && env.ENVIRONMENT == "prod") {
             const res = await fetch(`https://api.github.com/users/${username}/repos`, {
@@ -51,8 +50,7 @@ async function getUsernameData(username: string, session: any) {
                 }
             });
             let response = await res.json();
-            // console.log("response:")
-            // console.log(response)
+
 
             const data = response as GitHubRepo[]
 
@@ -81,13 +79,11 @@ async function getUsernameData(username: string, session: any) {
 
 async function getRepoLangs(langUrl: string, userObj: User, session?: any) {
 
-    // console.log("access token in getRepoLangs")
-    // console.log(session?.access_token)
+
     let res;
     try {
         if (env.ENVIRONMENT && env.ENVIRONMENT == "prod") {
-            // console.log("fetching from github api")
-            // console.log(langUrl
+
          res = await fetch(langUrl, {
             method: "GET",
             headers: {
@@ -143,7 +139,7 @@ async function organizeData(repos: GitHubRepo[], username: string, avatar_url: s
 
 
 
-        // console.log(userObj.getLangsArray())
+
         user.repositories = repoList
         user.languages = userObj.getLangsArray();
         return user;

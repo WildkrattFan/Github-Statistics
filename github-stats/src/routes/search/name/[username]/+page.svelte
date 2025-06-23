@@ -5,7 +5,7 @@
 
     let { data }: { data: PageData } = $props();
     let userData = data.userData as user;
-    // console.log(userData);
+
     let processedLangs = calculateLangPercent(userData.languages || []);
     let filteredLangs = $state(processedLangs);
     

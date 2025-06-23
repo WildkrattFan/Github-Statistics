@@ -1,5 +1,5 @@
 import type { PageServerLoad } from '../$types';
-import { redirect } from '@sveltejs/kit';
+import { isRedirect, redirect } from '@sveltejs/kit';
 
 
 export const load = (async ({ params, fetch, locals }) => {
@@ -8,24 +8,26 @@ export const load = (async ({ params, fetch, locals }) => {
 
     try{
     const session = await locals.auth();
-    if (!session?.user) throw redirect(303, '/auth');
-    // console.log("session user is")
-    // console.log(session)
+    if (!session?.user) throw redirect(404, '/auth');
+
 
     let res = await fetch(`/api/user/${encodeURIComponent(username)}`, {
         method: 'GET',
 
     });
     let userData = await res.json();
-    // console.log(userData)
+
     return {
         userData
     };
     }
     catch(err){
+        if(isRedirect(err)){
+            redirect(err.status, err.location)
+        }
         console.log("some error happend in loading")
         console.log(err)
-        redirect(404, "/error");
+        redirect(400, "/error");
     }
 
 }) satisfies PageServerLoad;
