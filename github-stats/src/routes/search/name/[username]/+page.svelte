@@ -586,8 +586,8 @@
     .loading-card-animation {
         background: linear-gradient(
             120deg,
-            rgba(255, 255, 255, 0.08) 0%,
-            rgba(241, 224, 90, 0.18) 30%,
+            rgba(255, 255, 255, 0.336) 0%,
+            rgba(185, 185, 180, 0.18) 30%,
             rgba(43, 116, 137, 0.18) 60%,
             rgba(255, 255, 255, 0.08) 100%
         );
