@@ -23,7 +23,7 @@
       </span>
       <button class="signout-btn" onclick={() => signOut()}>Sign Out</button>
     {:else}
-      <span class="notSignedInText">You are not signed in</span>
+      <span class="notSignedInText">Sign In To Search Users</span>
       <button class="signin-btn" onclick={() => signIn("github")}>Sign In with GitHub</button>
     {/if}
   </div>
