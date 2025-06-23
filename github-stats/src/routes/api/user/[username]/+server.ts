@@ -35,7 +35,12 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 };
 
 
-
+/**
+ * Gets all of the data associated with a username
+ * @param username 
+ * @param session 
+ * @returns 
+ */
 async function getUsernameData(username: string, session: any) {
 
 
@@ -77,6 +82,13 @@ async function getUsernameData(username: string, session: any) {
     }
 }
 
+/**
+ * Gets the languages associated with a specific github repository
+ * @param langUrl 
+ * @param userObj 
+ * @param session 
+ * @returns 
+ */
 async function getRepoLangs(langUrl: string, userObj: User, session?: any) {
 
 
@@ -114,6 +126,14 @@ async function getRepoLangs(langUrl: string, userObj: User, session?: any) {
 
 }
 
+/**
+ * Structures all of the data into a user type
+ * @param repos 
+ * @param username 
+ * @param avatar_url 
+ * @param session 
+ * @returns 
+ */
 async function organizeData(repos: GitHubRepo[], username: string, avatar_url: string, session?: any) {
 
     let userObj = new User(username);

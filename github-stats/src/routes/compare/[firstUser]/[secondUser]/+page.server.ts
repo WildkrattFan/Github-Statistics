@@ -5,7 +5,8 @@ import { isRedirect, redirect, error } from '@sveltejs/kit';
 
 
 export const load = (async ({ params, fetch, locals }) => {
-    let username = params.username
+    let user1Name = params.firstUser
+    let user2Name = params.secondUser
     
 
     try{
@@ -13,7 +14,17 @@ export const load = (async ({ params, fetch, locals }) => {
     if (!session?.user) throw redirect(303, '/');
 
 
-    let userData: Promise<user> = fetch(`/api/user/${encodeURIComponent(username)}`, {
+    let user1Data: Promise<user> = fetch(`/api/user/${encodeURIComponent(user1Name)}`, {
+        method: 'GET',
+    }).then(async(res) =>{
+        if(res.status !== 200){
+            const errData = await res.json();
+            throw error(res.status, errData?.error || 'Failed to load user data');
+        }
+        return res.json();
+    });
+
+    let user2Data: Promise<user> = fetch(`/api/user/${encodeURIComponent(user2Name)}`, {
         method: 'GET',
     }).then(async(res) =>{
         if(res.status !== 200){
@@ -25,7 +36,8 @@ export const load = (async ({ params, fetch, locals }) => {
 
 
     return {
-        userData
+        user1: user1Data,
+        user2: user2Data
     };
     }
     catch(err){

@@ -9,6 +9,7 @@
     let userData: user | null = $state(null);
     let processedLangs: any[] = $state([]);
     let filteredLangs: any[] = $state([]);
+    let compareUsers = $state(false);
     userPromise.then((finishedData) => {
         console.log("User Data Loaded:", userData);
         userData = finishedData as user;
@@ -40,6 +41,10 @@
     //     }));
     // }
 
+    function startComparing() {
+        compareUsers = true;
+    }
+
     function calculateLangPercent(langList: codingLang[]) {
         let totalLines = 0;
         let percentList: any[] = [];
@@ -70,6 +75,31 @@
             "C++": "#f34b7d",
             HTML: "#e34c26",
             CSS: "#563d7c",
+            Ruby: "#701516",
+            PHP: "#4F5D95",
+            Go: "#00ADD8",
+            Rust: "#dea584",
+            Swift: "#ffac45",
+            Kotlin: "#F18E33",
+            C: "#555555",
+            Shell: "#89e051",
+            "Objective-C": "#438eff",
+            Scala: "#c22d40",
+            Perl: "#0298c3",
+            Dart: "#00B4AB",
+            Lua: "#000080",
+            R: "#198CE7",
+            Haskell: "#5e5086",
+            Elixir: "#6e4a7e",
+            Clojure: "#db5855",
+            Groovy: "#e69f56",
+            "Visual Basic": "#945db7",
+            Assembly: "#6E4C13",
+            MATLAB: "#e16737",
+            CoffeeScript: "#244776",
+            VHDL: "#adb2cb",
+            "F#": "#b845fc",
+            Erlang: "#B83998",
             // fallback
             default: "#ccc",
         };
@@ -163,34 +193,40 @@
 
             <div class="langGroup">
                 <h1 class="lang-header">Languages</h1>
-                <div class="lang-bar card loading-card-animation" ></div>
-                <div class="lang-filter-loading card ">
+                <div class="lang-bar card loading-card-animation"></div>
+                <div class="lang-filter-loading card">
                     <span class="filter-label">Filter by language:</span>
                     {#each Array(12) as lang}
-                    <label class="pill loading-pill">
-                        <input
-                            type="checkbox"
-
-                        />
-                        <p></p>
-                    </label>
-                {/each}
+                        <label class="pill loading-pill">
+                            <input type="checkbox" />
+                            <p></p>
+                        </label>
+                    {/each}
                 </div>
             </div>
             <div class="Repos">
                 <h3 class="repo-header">Repositories</h3>
                 <div class="repo-boxes">
                     {#each Array(20) as _}
-                        <div class="repo-box fake-repo card loading-card-animation">
-
-
-                        </div>
+                        <div
+                            class="repo-box fake-repo card loading-card-animation"
+                        ></div>
                     {/each}
                 </div>
             </div>
         </div>
     </main>
 {:then userData}
+    {#if compareUsers}
+        <div class="compare-form">
+            <form method="post" action="?/compare">
+                <h3>Compare Two GitHub Accounts!</h3>
+                <input type="text" name="newUser" />
+                <input type="hidden" name="firstUser" value={userData.name}>
+                <button>Submit</button>
+            </form>
+        </div>
+    {/if}
     <main>
         <div class="userHeader">
             <img class="avatar" src={userData.avatar} alt="User PFP " />
@@ -199,7 +235,15 @@
                 href="https://www.github.com/{userData.name}"
                 target="_blank">Stats for {userData.name}</a
             >
+            <div class="compare">
+                <button
+                    onclick={() => {
+                        startComparing();
+                    }}>Compare</button
+                >
+            </div>
         </div>
+
         <!--Languages and % of languages that were used-->
         <div class="langGroup">
             <h1 class="lang-header">Languages</h1>
@@ -550,6 +594,18 @@
         justify-content: space-between;
     }
 
+    .compare-form {
+        display: flex;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: red;
+        align-items: center;
+        justify-content: center;
+        padding: 5em;
+    }
+
     .search-bar {
         width: 100%;
         display: flex;
@@ -606,11 +662,11 @@
             background-position: 0 0;
         }
     }
-    .fake-repo{
+    .fake-repo {
         width: 5rem;
         height: 9rem;
     }
-    .loading-pill{
+    .loading-pill {
         display: flex;
         align-items: center;
         flex-direction: row;
