@@ -1,4 +1,5 @@
 <script lang="ts">
+      import { signOut } from "@auth/sveltekit/client";
     import type { PageData } from "./$types";
     import type { codingLang, user, projectLang } from "$lib/types";
     import { Chart } from "chart.js";
@@ -119,6 +120,18 @@
     }
 </script>
 
+<div class = "nav-bar">
+    <a class = "home-link" href="/">GitHub Stats</a>
+    <!-- <button onclick={() => signOut()}>Sign Out</button> -->
+    <div class ="search-bar">
+    <form method = "POST" action="../..?/search">
+        <input type = "text" name = "username">
+        <button>Search</button>
+    </form>
+    </div>
+    
+</div>
+
 <main>
     <div class="userHeader">
         <img class="avatar" src={data.userData.avatar} alt="User PFP " />
@@ -221,6 +234,10 @@
         box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.18);
         padding: 2rem 2.5rem;
         margin-bottom: 1.5rem;
+    }
+    .home-link{
+        color: white;
+        font-size: 2em;
     }
 
     .userHeader {
@@ -385,5 +402,47 @@
         .lang-bar {
             height: 28px;
         }
+    }
+    
+    .nav-bar{
+        width: 100%;
+        background: #232526;
+        padding: 1em;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+            "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        font-weight: bold;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 2em;
+        color: white;
+        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+        position: sticky;
+        justify-content: space-between;
+
+    }
+
+    .search-bar{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-right: 5em;
+    }
+    .search-bar input{
+        background-color: white;
+        border: none;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        border-radius: 5px;
+    }
+    .search-bar button{
+        background-color: #2b7489;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        margin-left: 0.5em;
+        cursor: pointer;
     }
 </style>
