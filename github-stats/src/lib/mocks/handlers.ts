@@ -1,18 +1,29 @@
-import {http, HttpResponse} from 'msw'
+import { http, HttpResponse } from 'msw'
 import * as fs from 'fs'
 
 export const handlers = [
-    http.get('https://api.mockuser.com/users/:username/repos', ({params}) =>{
-        const {username} = params;
-        const jsonDataString = fs.readFileSync(`./static/mock-data/users/${username}/repos/data.JSON`, 'utf8')
-        // console.log(JSON.parse(jsonDataString))
-        return HttpResponse.json(JSON.parse(jsonDataString))
+    http.get('https://api.mockuser.com/users/:username/repos', ({ params }) => {
+        const { username } = params;
+        try {
+            const jsonDataString = fs.readFileSync(`./static/mock-data/users/${username}/repos/data.JSON`, 'utf8');
+            if (!jsonDataString) {
+                return HttpResponse.json({ error: "Data not found" }, { status: 404 });
+            }
+            return HttpResponse.json(JSON.parse(jsonDataString), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        } catch (e) {
+            return HttpResponse.json({ error: "Data not found" }, { status: 404 });
+        }
     }),
-    http.get('https://api.mockuser.com/repos/:username/:repo/languages', ({params}) =>{
-        const {username, repo} = params;
-        // console.log(username, repo)
-        const jsonDataString = fs.readFileSync(`./static/mock-data/users/${username}/repos/${repo}/languages/data.JSON`, 'utf8')
-        // console.log(jsonDataString)
-        return HttpResponse.json(JSON.parse(jsonDataString))
+    http.get('https://api.mockuser.com/repos/:username/:repo/languages', ({ params }) => {
+        const { username, repo } = params;
+        try {
+            const jsonDataString = fs.readFileSync(`./static/mock-data/users/${username}/repos/${repo}/languages/data.JSON`, 'utf8');
+            if (!jsonDataString) {
+                return HttpResponse.json({ error: "Data not found" }, { status: 404 });
+            }
+            return HttpResponse.json(JSON.parse(jsonDataString), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        } catch (e) {
+            return HttpResponse.json({ error: "Data not found" }, { status: 404 });
+        }
     })
 ]
