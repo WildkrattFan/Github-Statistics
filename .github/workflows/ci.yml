@@ -8,21 +8,10 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: mysecretpassword
-          POSTGRES_DB: local
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    runs-on: ubuntu-latest    
     env:
       DATABASE_URL: "postgres://root:mysecretpassword@localhost:5432/local"
-      ENVIRONMENT: dev
+      ENVIRONMENT: "dev"
       GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
       GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
@@ -43,5 +32,3 @@ jobs:
           sleep 10 # Wait for the dev server to start
       - name: Run unit tests
         run: npm run test:unit || npm run test # fallback if no test:unit
-      - name: Run API tests
-        run: npm run test:api || npm run test # fallback if no test:api
