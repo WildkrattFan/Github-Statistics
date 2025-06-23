@@ -28,8 +28,8 @@ export class User {
     //Object.entries(jsonData).map(([name, lines]) => ({name, lines})) as projectLang[];
     getLangsArray(): codingLang[]{
         const langArray: codingLang[] = Object.entries(this.languages).map(([name, lines]) => ({ name, lines } as codingLang));
-        console.log("Languages Array: ");
-        console.log(langArray);
+        // console.log("Languages Array: ");
+        // console.log(langArray);
         return langArray;
     }
 }
