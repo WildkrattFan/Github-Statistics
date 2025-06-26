@@ -292,7 +292,7 @@
                         {/each}
                     </div>
                     <form class = "view-user-form" method="POST" action="../..?/search">
-            <input type="hidden" name="username" value={user1?.name} />
+            <input type="hidden" name="username" value={user2?.name} />
             <button>View</button>
         </form>
                 </div>
