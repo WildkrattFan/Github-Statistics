@@ -8,7 +8,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async (event) => {
       GitHub({
         clientId: env.GITHUB_CLIENT_ID,
         clientSecret: env.GITHUB_SECRET,
-        authorization: {params: {scope: "read:user public_repo"}}
+        authorization: {params: {scope: "read:user"}}
       })
     ],
     secret: env.AUTH_SECRET,
