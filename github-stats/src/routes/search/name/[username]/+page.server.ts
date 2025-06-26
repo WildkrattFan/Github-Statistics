@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { isRedirect, redirect, error } from '@sveltejs/kit';
-  import { signIn, signOut } from "@auth/sveltekit/client";
+
   import type { user } from '$lib/types';
 
 
@@ -20,6 +20,7 @@ export const load = (async ({ params, fetch, locals }) => {
             const errData = await res.json();
             throw error(res.status, errData?.error || 'Failed to load user data');
         }
+
         return res.json();
     });
 
@@ -32,11 +33,17 @@ export const load = (async ({ params, fetch, locals }) => {
         if(isRedirect(err)){
             throw err;
         }
-        console.log("some error happend in loading 1")
-        console.log(err)
+
         throw error(400, 'Failed to load user page');
     }
 
 }) satisfies PageServerLoad;
 
 
+export const actions ={
+    compare: async ({cookies, request}) => {
+        let formData = await request.formData();
+        let formObject = Object.fromEntries(formData.entries())
+        throw redirect(303, `/compare/${formObject.firstUser}/${formObject.newUser}`)
+    }
+}

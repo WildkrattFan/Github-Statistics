@@ -1,3 +1,11 @@
+<svelte:head>
+  <title>GitHub Stats</title>
+  <meta name="description" content="View GitHub statistics for users." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.ico" />
+</svelte:head>
+
+
 <script lang="ts">
   import { SignIn, SignOut } from "@auth/sveltekit/components";
   import { page } from "$app/stores";

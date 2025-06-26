@@ -29,7 +29,7 @@ export const actions = {
         throw redirect(303, `search/name/${username}`)
         }
         catch(err){
-            console.log(err)
+
             if(isRedirect(err)){
                 throw redirect(err.status, err.location)
             }
@@ -37,7 +37,7 @@ export const actions = {
                 if(err instanceof z.ZodError){
 
                     let errorMessage = (z.formatError(err).username._errors[0])
-                    console.log(errorMessage)
+
                     return{
                         usernameError: errorMessage
                     }
