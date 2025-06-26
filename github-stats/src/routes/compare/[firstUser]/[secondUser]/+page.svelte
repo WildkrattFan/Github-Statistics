@@ -1,11 +1,17 @@
+<svelte:head>
+    <title>GitHub Stats - Compare Users</title>
+    <meta name="description" content="Compare GitHub statistics of two users." />
+    </svelte:head>
+
+
 <script lang="ts">
     import { signOut } from "@auth/sveltekit/client";
     import type { PageData } from "./$types";
     import type { codingLang, user, projectLang } from "$lib/types";
     import { Chart } from "chart.js";
-
+    import { goto } from '$app/navigation';
     let { data }: { data: PageData } = $props();
-    console.log(data);
+
     let user1Promise = data.user1;
     let user2Promise = data.user2;
 
@@ -16,8 +22,9 @@
     let compareUsers = $state(false);
     let langComp =  $state<Record<string, { user1: number; user2: number; user1win: boolean; user2win: boolean; user1percent: number; user2percent: number; }>>({});
 
+    //handles adding the data once the user1 and user2 promises resolve
     user1Promise.then((finishedData) => {
-        console.log("User Data Loaded:", user1);
+
         user1 = finishedData as user;
 
         processedLangs = calculateLangPercent(user1.languages || []);
@@ -36,7 +43,7 @@
     });
 
         user2Promise.then((finishedData) => {
-        console.log("User Data Loaded:", user2);
+
         user2 = finishedData as user;
 
         processedLangs = calculateLangPercent(user2.languages || []);
@@ -53,6 +60,8 @@
             }));
         }
     });
+
+    // Wait for both promises to resolve before generating the comparison
     Promise.all([user1Promise, user2Promise]).then(() => {
         if ( user1 && user2) {
             langComp = generateLangComparison(user1, user2);
@@ -61,9 +70,7 @@
 
 
 
-    function startComparing() {
-        compareUsers = true;
-    }
+
 
     function calculateLangPercent(langList: codingLang[]) {
         let totalLines = 0;
@@ -126,6 +133,12 @@
         return colors[name] || colors["default"];
     }
 
+    //Formats numbers with commas for better readability
+    function numberWithCommas(x: number | string): string {
+        return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Determines the winner based on the number of repositories or lines of code
     function getWinner(currentUSer?: number, otherUser?: number): boolean {
         if (currentUSer === undefined && otherUser === undefined) {
             return false; // If either number is undefined, treat as a tie
@@ -145,6 +158,7 @@
         }
     }
 
+    // Generates a comparison object for the languages used by both users
     function generateLangComparison(user1: user, user2: user){
         let languageComparison: Record<string, { user1: number; user2: number; user1win: boolean; user2win: boolean; user1percent: number; user2percent: number; }> = {};
         const allLangs = new Set([
@@ -184,7 +198,50 @@
 
 {#await Promise.all([user1Promise, user2Promise])}
     <main>
-        
+        <div class="users">
+            <div class="user user1">
+                <div>
+                    <h1></h1>
+                    <div class="avatar-skeleton"></div>
+                    <div class="user-stats">
+                        <h2 style="margin-bottom: 5rem;"></h2>
+                        {#each Array(20) as item}
+                        <div class = "language-single-stat single-stat-loading">
+                            <h3>
+                            
+                            </h3>
+                            <h4></h4>
+                            <h4></h4>
+
+                        </div>
+
+
+                        {/each}
+                    </div>
+                </div>
+            </div>
+            <div class="user user2">
+                <div>
+                    <h1></h1>
+                    <div class="avatar-skeleton"></div>
+                    <div class="user-stats">
+                        <h2 style="margin-bottom: 5rem;"></h2>
+                        {#each Array(20) as item}
+                        <div class = "language-single-stat single-stat-loading ">
+                            <h3>
+                            
+                            </h3>
+                            <h4></h4>
+                            <h4></h4>
+
+                        </div>
+
+
+                        {/each}
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 {:then userData}
     <main>
@@ -196,11 +253,11 @@
                     <div class="user-stats">
                         <h2>Repositories: {user1?.repositories?.length || 0} {#if getWinner(user1?.repositories?.length, user2?.repositories?.length)}👑{/if}</h2>
                         {#each Object.entries(langComp) as [lang, stats]}
-                        <div class = "language-single-stat">
+                        <div class = "language-single-stat ">
                             <h3 style="color: {getColor(lang)}">{lang}{#if stats.user1win}
                             👑
                             {/if}</h3>
-                            <h4><strong>Lines: </strong> {stats.user1}</h4>
+                            <h4><strong>Lines: </strong> {numberWithCommas(stats.user1)}</h4>
                             <h4>{stats.user1percent}% of aggregated code</h4>
 
                         </div>
@@ -208,20 +265,25 @@
 
                         {/each}
                     </div>
+                    <form class = "view-user-form" method="POST" action="../..?/search">
+            <input type="hidden" name="username" value={user1?.name} />
+            <button>View</button>
+        </form>
                 </div>
+                
             </div>
-            <div class="user user2">
+            <div  class="user user2">
                 <div>
                     <h1>{user2?.name}</h1>
                     <img src={user2?.avatar} alt="{user2?.name}'s avatar" style="width:64px;height:64px;border-radius:50%;border:2px solid #444;" />
                     <div class="user-stats">
                         <h2>Repositories: {user2?.repositories?.length || 0} {#if getWinner(user2?.repositories?.length, user1?.repositories?.length)}👑{/if}</h2>
                         {#each Object.entries(langComp) as [lang, stats]}
-                        <div class = "language-single-stat">
+                        <div class = "language-single-stat ">
                             <h3 style="color: {getColor(lang)}">{lang}{#if stats.user2win}
                             👑
                             {/if}</h3>
-                            <h4><strong>Lines:</strong> {stats.user2}</h4>
+                            <h4><strong>Lines:</strong> {numberWithCommas(stats.user2)}</h4>
                             <h4>{stats.user2percent}% of aggregated code</h4>
                             
                         </div>
@@ -229,28 +291,15 @@
 
                         {/each}
                     </div>
+                    <form class = "view-user-form" method="POST" action="../..?/search">
+            <input type="hidden" name="username" value={user1?.name} />
+            <button>View</button>
+        </form>
                 </div>
+                
             </div>
         </div>
 
-        <!-- <div class="language-bars"> -->
-
-            <!-- <div class="language-bar center-diverging-bar">
-                <div class="lang-half left-from-center" style="width: 34000px; background: {getColor('Python')};">
-                    <span class="lang-label left">Python</span>
-                </div>
-                
-                <div class="lang-half right-from-center" style="width: 20px; background: {getColor('Python')};">
-                    <span class="lang-label right">Python</span>
-                </div>
-                <div class="center-divider"></div>
-            </div>
-            <div class="line-count">
-                <h3 class={getWinner(200,400)}>200</h3>
-                <h3 class={getWinner(400,200)}>400</h3>
-            </div> -->
-<!--             
-        </div> -->
     </main>
 {:catch error}
     <p>Error loading user data: {error.message}</p>
@@ -261,24 +310,64 @@
         display: flex;
         flex-direction: row;
         height: 100%;
+        align-items: stretch;
     }
     .user1, .user2 {
         display: flex;
         width: 50%;
         height: 100%;
         justify-content: center;
-        align-items: center;
+        align-items: stretch;
     }
     .user1 > div, .user2 > div {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         width: 100%;
+        background: rgba(40,40,50,0.95);
+        border-radius: 18px;
+        box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
+        padding: 2rem 2.5rem 1.5rem 2.5rem;
+        margin-bottom: 1.5rem;
+        min-width: 240px;
+        max-width: 420px;
+        height: 100%;
+    }
+    .view-user-form{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1rem;
+    }
+    .view-user-form button {
+        background-color: #2b7489;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .single-stat-loading{
+        height: 4.5rem;
+        width: 100%;
+        animation: skeleton-loading 1.2s infinite linear;
+        background: linear-gradient(
+            120deg,
+            rgba(255, 255, 255, 0.336) 0%,
+            rgba(185, 185, 180, 0.18) 30%,
+            rgba(43, 116, 137, 0.18) 60%,
+            rgba(255, 255, 255, 0.08) 100%
+        );
     }
     .user1 h1, .user2 h1 {
         text-align: center;
         width: 100%;
+        color: #f1e05a;
+        font-size: 2rem;
+        margin-bottom: 1.2rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
     .user-stats {
         display: flex;
@@ -289,93 +378,15 @@
         font-size: 1.2em;
         margin-top: 0.5em;
         width: 100%;
-        text-align: center;
+        max-width: 350px;
+        gap: 0.7em;
+        background: rgba(30,30,40,0.92);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+        padding: 1em 0.5em 1.2em 0.5em;
     }
-    .more-lines{
-        color: #4CAF50; /* Green */
-    }
-    .less-lines{
-        color: #F44336; /* Red */
-    }
-    .language-bars {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-    }
-    .line-count{
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        width: 100%;
-        padding: 0 1em;
-        color: #fff;
-        font-size: 1.2em;
-        font-weight: bold;
-    }
-    .language-bar.center-diverging-bar {
-        position: relative;
-        width: 60%;
-        min-width: 240px;
-        max-width: 600px;
-        height: 2.5rem;
-        background: rgba(40, 40, 50, 0.95);
-        border-radius: 5px;
-        margin-bottom: 0.5em;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        overflow: visible;
-    }
-    .lang-half.left-from-center {
-        position: absolute;
-        right: 50%;
-        height: 100%;
-        border-radius: 5px 0 0 5px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        transition: width 0.4s;
-        z-index: 1;
-        flex-direction: row-reverse;
-    }
-    .lang-half.right-from-center {
-        position: absolute;
-        left: 50%;
-        height: 100%;
-        border-radius: 0 5px 5px 0;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        transition: width 0.4s;
-        z-index: 1;
-    }
-    .center-divider {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        width: 2px;
-        height: 100%;
-        background: #444;
-        z-index: 2;
-        transform: translateX(-1px);
-    }
-    .lang-label.left {
-        margin-right: 0.5em;
-        color: #fff;
-        font-size: 0.95em;
-        font-weight: 600;
-        white-space: nowrap;
-        text-shadow: 0 1px 2px #222;
-    }
-    .lang-label.right {
-        margin-left: 0.5em;
-        color: #fff;
-        font-size: 0.95em;
-        font-weight: 600;
-        white-space: nowrap;
-        text-shadow: 0 1px 2px #222;
-    }
+    
+   
 
     main {
         background: rgba(30, 30, 40, 0.92);
@@ -502,43 +513,123 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: rgba(40, 40, 50, 0.85);
-        border-radius: 10px;
-        margin: 0.5em 0;
-        padding: 0.7em 1.2em;
-        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
-        min-width: 120px;
-        max-width: 320px;
+        background: linear-gradient(135deg, rgba(40,40,50,0.98) 70%, #232526 100%);
+        border-radius: 14px;
+        margin: 0.7em 0;
+        padding: 1em 1.5em 1.2em 1.5em;
+        box-shadow: 0 4px 18px 0 rgba(0,0,0,0.18);
+        min-width: 140px;
+        max-width: 340px;
         width: 100%;
         border: 2px solid #232526;
-        transition: box-shadow 0.2s;
+        transition: box-shadow 0.2s, border 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .language-single-stat:hover {
+        box-shadow: 0 6px 24px 0 rgba(0,0,0,0.22);
+        border: 2px solid #f1e05a;
     }
     .language-single-stat h3 {
         color: #f1e05a;
-        font-size: 1.1em;
+        font-size: 1.2em;
         margin-bottom: 0.2em;
         margin-top: 0;
         text-align: center;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        text-shadow: 0 1px 2px #222;
     }
     .language-single-stat h4 {
         color: #fff;
         font-size: 1em;
         margin: 0.1em 0;
         text-align: center;
+        font-weight: 500;
     }
-    .language-single-stat h1 {
-        font-size: 1.3em;
-        margin: 0.2em 0 0 0;
-        text-align: center;
+
+    .language-single-stat::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; right: 0; bottom: 0;
+        background: linear-gradient(120deg, transparent 60%, rgba(241,224,90,0.08) 100%);
+        z-index: 0;
+        border-radius: 14px;
+        pointer-events: none;
+    }
+    .language-single-stat > * {
+        z-index: 1;
     }
     .user-stats {
-        gap: 0.5em;
+        gap: 0.7em;
+        background: rgba(30,30,40,0.92);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+        padding: 1em 0.5em 1.2em 0.5em;
+        margin-top: 0.7em;
+        width: 100%;
+        max-width: 350px;
+    }
+    .user1 > div, .user2 > div {
+        background: rgba(40,40,50,0.95);
+        border-radius: 18px;
+        box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
+        padding: 2rem 2.5rem 1.5rem 2.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 240px;
+        max-width: 420px;
+    }
+    .user1 h1, .user2 h1 {
+        color: #f1e05a;
+        font-size: 2rem;
+        margin-bottom: 1.2rem;
+        text-align: center;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .user1 img, .user2 img {
+        margin-bottom: 0.7em;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
     }
     @media (max-width: 900px) {
-        .language-single-stat {
-            min-width: 90px;
+        .users {
+            flex-direction: column;
+            align-items: center;
+        }
+        .user1, .user2 {
+            width: 100%;
             max-width: 98vw;
-            padding: 0.5em 0.5em;
+            align-items: stretch;
+        }
+        .user1 > div, .user2 > div {
+            min-width: unset;
+            max-width: 98vw;
+            padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+            height: auto;
         }
     }
+    .avatar-skeleton {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(
+            120deg,
+            rgba(255, 255, 255, 0.336) 0%,
+            rgba(185, 185, 180, 0.18) 30%,
+            rgba(43, 116, 137, 0.18) 60%,
+            rgba(255, 255, 255, 0.08) 100%
+        );
+    animation: skeleton-loading 1.2s infinite linear;
+    border: 2px solid #444;
+    margin-top: 2.5rem;
+}
+@keyframes skeleton-loading {
+    0% { background-position: -64px 0; }
+    100% { background-position: 64px 0; }
+}
 </style>

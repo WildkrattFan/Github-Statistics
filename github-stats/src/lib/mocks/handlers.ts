@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import * as fs from 'fs'
 
+// Mock handlers for user and repository data for testing purposes
 export const handlers = [
     http.get('https://api.mockuser.com/users/:username/repos', ({ params }) => {
         const { username } = params;

@@ -76,8 +76,7 @@ async function getUsernameData(username: string, session: any) {
         }
     }
     catch (err) {
-        console.log("Error in getUsernameData:")
-        console.log(err)
+
         throw err; // Re-throw the error to be caught in the GET handler
     }
 }
@@ -119,8 +118,7 @@ async function getRepoLangs(langUrl: string, userObj: User, session?: any) {
         return data;
     }
     catch (err) {
-        console.log("Error in getRepoLangs:")
-        console.log(err)
+
         throw err; // Re-throw the error to be caught in the GET handler
     }
 
@@ -164,8 +162,7 @@ async function organizeData(repos: GitHubRepo[], username: string, avatar_url: s
         user.languages = userObj.getLangsArray();
         return user;
     } catch (err) {
-        console.log("Error in organizeData:")
-        console.log(err)
+
         throw err; // Re-throw the error to be caught in the GET handler
     }
 }

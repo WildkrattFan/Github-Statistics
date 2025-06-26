@@ -20,6 +20,7 @@ export const load = (async ({ params, fetch, locals }) => {
             const errData = await res.json();
             throw error(res.status, errData?.error || 'Failed to load user data');
         }
+
         return res.json();
     });
 
@@ -32,8 +33,7 @@ export const load = (async ({ params, fetch, locals }) => {
         if(isRedirect(err)){
             throw err;
         }
-        console.log("some error happend in loading 1")
-        console.log(err)
+
         throw error(400, 'Failed to load user page');
     }
 

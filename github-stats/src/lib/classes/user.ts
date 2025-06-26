@@ -9,7 +9,7 @@ export class User {
     }
 
     addToLangs(langs: projectLang[]): void {
-        //TODO: Implement
+
         langs.forEach((lang: projectLang) =>{
             let langName = lang.name
             if(this.languages[langName]){
@@ -25,7 +25,7 @@ export class User {
     getLangs(): Record<string, number>{
         return this.languages;
     }
-    //Object.entries(jsonData).map(([name, lines]) => ({name, lines})) as projectLang[];
+
     getLangsArray(): codingLang[]{
         const langArray: codingLang[] = Object.entries(this.languages).map(([name, lines]) => ({ name, lines } as codingLang));
 

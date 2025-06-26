@@ -44,18 +44,10 @@ export const load = (async ({ params, fetch, locals }) => {
         if (isRedirect(err)) {
             throw err;
         }
-        console.log("some error happend in loading 1")
-        console.log(err)
+
         throw error(400, 'Failed to load user page');
     }
 
 }) satisfies PageServerLoad;
 
 
-export const actions = {
-    compare: async ({ cookies, request }) => {
-        let formData = await request.formData();
-        let formObject = Object.fromEntries(formData.entries())
-        throw redirect(303, `/compare/${formObject.firstUser}/${formObject.newUser}`)
-    }
-}

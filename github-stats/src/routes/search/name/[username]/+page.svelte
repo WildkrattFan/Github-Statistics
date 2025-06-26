@@ -1,8 +1,18 @@
+<svelte:head>
+    <title>{userData?.name}'s GitHub Stats</title>
+    <meta name="description" content="View GitHub statistics for {userData?.name}. Compare with other users and see language usage." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" />
+
+</svelte:head>
+
+
+
 <script lang="ts">
-    import { signOut } from "@auth/sveltekit/client";
+
     import type { PageData } from "./$types";
     import type { codingLang, user, projectLang } from "$lib/types";
-    import { Chart } from "chart.js";
+
 
     let { data }: { data: PageData } = $props();
     let userPromise = data.userData;
@@ -10,8 +20,10 @@
     let processedLangs: any[] = $state([]);
     let filteredLangs: any[] = $state([]);
     let compareUsers = $state(false);
+
+    // Load user data from the promise once the promise resolves
     userPromise.then((finishedData) => {
-        console.log("User Data Loaded:", userData);
+
         userData = finishedData as user;
 
         processedLangs = calculateLangPercent(userData.languages || []);
@@ -28,23 +40,13 @@
             }));
         }
     });
-    // let userData = data.userData as user;
 
-    // let processedLangs = calculateLangPercent(userData.languages || []);
-    // let filteredLangs = $state(processedLangs);
-
-    // Ensure each repo's langs are processed to include percent
-    // if (userData.repositories) {
-    //     userData.repositories = userData.repositories.map((repo) => ({
-    //         ...repo,
-    //         langs: repo.langs ? calculateLangPercent(repo.langs as unknown as codingLang[]) : []
-    //     }));
-    // }
 
     function startComparing() {
-        compareUsers = true;
+        compareUsers = !compareUsers;
     }
 
+    //Calculate the percentage of lines for each language
     function calculateLangPercent(langList: codingLang[]) {
         let totalLines = 0;
         let percentList: any[] = [];
@@ -106,6 +108,7 @@
         return colors[name] || colors["default"];
     }
 
+    // Filter languages based on the name for  the filter functionality
     function filterLangs(name: string) {
         if (filteredLangs.some((lang) => lang.name == name)) {
             let partialLangsLines = 0;
@@ -137,18 +140,8 @@
         }
     }
 
-    function updateRepoLangs(userData: user) {
-        userData.repositories =
-            userData.repositories?.map((repo) => {
-                return {
-                    ...repo,
-                    langs: calculateLangPercent(
-                        (repo.langs ?? []) as unknown as codingLang[],
-                    ),
-                };
-            }) ?? null;
-    }
 
+    // Convert date string to a human-readable "time ago" format
     function dateToTimeAgo(dateStr: string) {
         const date = new Date(dateStr);
         const now = new Date();
@@ -175,6 +168,8 @@
     }
 </script>
 
+
+
 <div class="nav-bar">
     <a class="home-link" href="/">GitHub Stats</a>
     <!-- <button onclick={() => signOut()}>Sign Out</button> -->
@@ -190,6 +185,13 @@
     <main>
         <div class="loading-container">
             <div class="userHeader"></div>
+            <div class="compare">
+                <button
+                    onclick={() => {
+                        startComparing();
+                    }}>Compare</button
+                >
+            </div>
 
             <div class="langGroup">
                 <h1 class="lang-header">Languages</h1>
@@ -218,14 +220,19 @@
     </main>
 {:then userData}
     {#if compareUsers}
+    <div class="compare-form-container">
         <div class="compare-form">
+            <button class="close-compare-form" onclick={() => startComparing()}
+                >X</button
+            >
             <form method="post" action="?/compare">
                 <h3>Compare Two GitHub Accounts!</h3>
                 <input type="text" name="newUser" />
-                <input type="hidden" name="firstUser" value={userData.name}>
-                <button>Submit</button>
+                <input type="hidden" name="firstUser" value={userData.name} />
+                <button type="submit">Submit</button>
             </form>
         </div>
+        </div>  
     {/if}
     <main>
         <div class="userHeader">
@@ -235,13 +242,13 @@
                 href="https://www.github.com/{userData.name}"
                 target="_blank">Stats for {userData.name}</a
             >
-            <div class="compare">
-                <button
-                    onclick={() => {
-                        startComparing();
-                    }}>Compare</button
-                >
-            </div>
+        </div>
+        <div class="compare">
+            <button
+                onclick={() => {
+                    startComparing();
+                }}>Compare</button
+            >
         </div>
 
         <!--Languages and % of languages that were used-->
@@ -315,6 +322,7 @@
             </div>
         </div>
     </main>
+
 {:catch error}
     <p>Error loading user data: {error.message}</p>
 {/await}
@@ -593,17 +601,115 @@
         position: sticky;
         justify-content: space-between;
     }
+    .compare {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    button {
+        background: #2b7489;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.7em 1.5em;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.5em;
+        transition:
+            background 0.2s,
+            color 0.2s;
+        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+    }
+    button:hover {
+        background: #f1e05a;
+        color: #232526;
+    }
 
     .compare-form {
         display: flex;
-        position: absolute;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: red;
-        align-items: center;
-        justify-content: center;
-        padding: 5em;
+        background: rgb(40, 40, 50);
+        border-radius: 22px;
+        box-shadow:
+            0 8px 32px 0 rgba(43, 116, 137, 0.22),
+            0 2px 8px 0 rgba(241, 224, 90, 0.08);
+        padding: 3.5em 2.5em 2.5em 2.5em;
+        z-index: 1000;
+        min-width: 320px;
+        max-width: 96vw;
+        border: 2.5px solid #2b7489;
+        animation: popup-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes popup-fade-in {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, -60%) scale(0.95);
+        }
+        100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+    .compare-form h3 {
+        color: #f1e05a;
+        font-size: 1.5em;
+        margin-bottom: 1.2em;
+        text-align: center;
+        font-weight: 700;
+    }
+    .compare-form input[type="text"] {
+        padding: 0.7em 1.2em;
+        border-radius: 8px;
+        border: 1.5px solid #444;
+        background: #232526;
+        color: #f5f5f5;
+        font-size: 1.1rem;
+        width: 90%;
+
+        margin-bottom: 1.2em;
+        transition:
+            border 0.2s,
+            background 0.2s;
+    }
+    .compare-form input[type="text"]:focus {
+        outline: none;
+        border: 1.5px solid #f1e05a;
+        background: #232526;
+    }
+    .compare-form button {
+        background: (#2b7489);
+        color: #232526;
+        border: none;
+        border-radius: 8px;
+        padding: 0.7em 1.5em;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 0.5em;
+        transition:
+            background 0.2s,
+            color 0.2s,
+            box-shadow 0.2s,
+            transform 0.2s;
+        box-shadow: 0 2px 8px 0 rgba(43, 116, 137, 0.18);
+        letter-spacing: 0.5px;
+        outline: none;
+        border: 2px solid #2b7489;
+    }
+    .compare-form button:hover,
+    .compare-form button:focus {
+        background: linear-gradient(90deg, #f1e05a 0%, #2b7489 100%);
+        color: #232526;
+        box-shadow: 0 6px 24px 0 rgba(241, 224, 90, 0.18);
+        border: 2px solid #f1e05a;
+        transform: translateY(-2px) scale(1.04);
     }
 
     .search-bar {
@@ -671,5 +777,28 @@
         align-items: center;
         flex-direction: row;
         min-width: 2rem;
+    }
+    .compare-form-container{
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        background: rgba(0, 0, 0, 0.5);
+        animation: fade-in 0.3s;
+    }
+    .close-compare-form {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: transparent;
+        border: none !important;
+        color: white !important;
+        font-size: 1.5rem !important;
+        cursor: pointer !important;
+        transition: color 0.2s !important;
+        box-shadow: none !important;
+    }
+    .close-compare-form:hover {
+        color: #f1e05a !important;
+        background: transparent !important;
     }
 </style>
