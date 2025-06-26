@@ -5,29 +5,59 @@
     import { Chart } from "chart.js";
 
     let { data }: { data: PageData } = $props();
-    let userPromise = data.userData;
-    let userData: user | null = $state(null);
+    console.log(data);
+    let user1Promise = data.user1;
+    let user2Promise = data.user2;
+
+    let user1: user | null = $state(null);
+    let user2: user | null = $state(null);
     let processedLangs: any[] = $state([]);
     let filteredLangs: any[] = $state([]);
     let compareUsers = $state(false);
-    // userPromise.then((finishedData) => {
-    //     console.log("User Data Loaded:", userData);
-    //     userData = finishedData as user;
+    let langComp =  $state<Record<string, { user1: number; user2: number; user1win: boolean; user2win: boolean; user1percent: number; user2percent: number; }>>({});
 
-    //     processedLangs = calculateLangPercent(userData.languages || []);
-    //     filteredLangs = processedLangs;
+    user1Promise.then((finishedData) => {
+        console.log("User Data Loaded:", user1);
+        user1 = finishedData as user;
 
-    //     if (userData.repositories) {
-    //         userData.repositories = userData.repositories.map((repo) => ({
-    //             ...repo,
-    //             langs: repo.langs
-    //                 ? calculateLangPercent(
-    //                       repo.langs as unknown as codingLang[],
-    //                   )
-    //                 : [],
-    //         }));
-    //     }
-    // });
+        processedLangs = calculateLangPercent(user1.languages || []);
+        filteredLangs = processedLangs;
+
+        if (user1.repositories) {
+            user1.repositories = user1.repositories.map((repo) => ({
+                ...repo,
+                langs: repo.langs
+                    ? calculateLangPercent(
+                          repo.langs as unknown as codingLang[],
+                      )
+                    : [],
+            }));
+        }
+    });
+
+        user2Promise.then((finishedData) => {
+        console.log("User Data Loaded:", user2);
+        user2 = finishedData as user;
+
+        processedLangs = calculateLangPercent(user2.languages || []);
+        filteredLangs = processedLangs;
+
+        if (user2.repositories) {
+            user2.repositories = user2.repositories.map((repo) => ({
+                ...repo,
+                langs: repo.langs
+                    ? calculateLangPercent(
+                          repo.langs as unknown as codingLang[],
+                      )
+                    : [],
+            }));
+        }
+    });
+    Promise.all([user1Promise, user2Promise]).then(() => {
+        if ( user1 && user2) {
+            langComp = generateLangComparison(user1, user2);
+        }
+    });
 
 
 
@@ -96,14 +126,47 @@
         return colors[name] || colors["default"];
     }
 
-    function getWinner(u1Num: number, u2Num: number): string {
-        if (u1Num > u2Num) {
-            return "more-lines";
-        } else if (u2Num > u1Num) {
-            return "less-lines";
-        } else {
-            return "tie-lines";
+    function getWinner(currentUSer?: number, otherUser?: number): boolean {
+        if (currentUSer === undefined && otherUser === undefined) {
+            return false; // If either number is undefined, treat as a tie
         }
+        if (currentUSer === undefined) {
+            return false; // If user 1's number is undefined, user 2 is the winner
+        }
+        if (otherUser === undefined) {
+            return true; // If user 2's number is undefined, user 1 is the winner
+        }
+        if (currentUSer > otherUser) {
+            return true;
+        } else if (otherUser > currentUSer) {
+            return false;
+        } else {
+            return false;
+        }
+    }
+
+    function generateLangComparison(user1: user, user2: user){
+        let languageComparison: Record<string, { user1: number; user2: number; user1win: boolean; user2win: boolean; user1percent: number; user2percent: number; }> = {};
+        const allLangs = new Set([
+            ...(user1.languages || []).map((lang) => lang.name),
+            ...(user2.languages || []).map((lang) => lang.name),
+        ]);
+        allLangs.forEach((lang) => {
+            const user1Lang = user1.languages?.find((l) => l.name === lang);
+            const user2Lang = user2.languages?.find((l) => l.name === lang);
+            const user1Lines = user1Lang ? user1Lang.lines : 0;
+            const user2Lines = user2Lang ? user2Lang.lines : 0;
+
+            languageComparison[lang] = {
+                user1: user1Lines,
+                user2: user2Lines,
+                user1win: getWinner(user1Lines, user2Lines),
+                user2win: getWinner(user2Lines, user1Lines),
+                user1percent: user1Lines + user2Lines === 0 ? 0 : parseFloat(((user1Lines / (user1Lines + user2Lines)) * 100).toFixed(2)),
+                user2percent: user1Lines + user2Lines === 0 ? 0 : parseFloat(((user2Lines / (user1Lines + user2Lines)) * 100).toFixed(2)),
+            };
+        });
+        return languageComparison;
     }
 
 </script>
@@ -119,7 +182,7 @@
     </div>
 </div>
 
-{#await data.userData}
+{#await Promise.all([user1Promise, user2Promise])}
     <main>
         
     </main>
@@ -128,25 +191,56 @@
         <div class="users">
             <div class="user user1">
                 <div>
-                    <h1>alice</h1>
-                    <img src="https://avatars.githubusercontent.com/u/1?v=4" alt="alice avatar" style="width:64px;height:64px;border-radius:50%;border:2px solid #444;" />
+                    <h1>{user1?.name}</h1>
+                    <img src={user1?.avatar} alt="{user1?.name}'s' avatar" style="width:64px;height:64px;border-radius:50%;border:2px solid #444;" />
+                    <div class="user-stats">
+                        <h2>Repositories: {user1?.repositories?.length || 0} {#if getWinner(user1?.repositories?.length, user2?.repositories?.length)}👑{/if}</h2>
+                        {#each Object.entries(langComp) as [lang, stats]}
+                        <div class = "language-single-stat">
+                            <h3 style="color: {getColor(lang)}">{lang}{#if stats.user1win}
+                            👑
+                            {/if}</h3>
+                            <h4><strong>Lines: </strong> {stats.user1}</h4>
+                            <h4>{stats.user1percent}% of aggregated code</h4>
+
+                        </div>
+
+
+                        {/each}
+                    </div>
                 </div>
             </div>
             <div class="user user2">
                 <div>
-                    <h1>bob</h1>
-                    <img src="https://avatars.githubusercontent.com/u/2?v=4" alt="bob avatar" style="width:64px;height:64px;border-radius:50%;border:2px solid #444;" />
+                    <h1>{user2?.name}</h1>
+                    <img src={user2?.avatar} alt="{user2?.name}'s avatar" style="width:64px;height:64px;border-radius:50%;border:2px solid #444;" />
+                    <div class="user-stats">
+                        <h2>Repositories: {user2?.repositories?.length || 0} {#if getWinner(user2?.repositories?.length, user1?.repositories?.length)}👑{/if}</h2>
+                        {#each Object.entries(langComp) as [lang, stats]}
+                        <div class = "language-single-stat">
+                            <h3 style="color: {getColor(lang)}">{lang}{#if stats.user2win}
+                            👑
+                            {/if}</h3>
+                            <h4><strong>Lines:</strong> {stats.user2}</h4>
+                            <h4>{stats.user2percent}% of aggregated code</h4>
+                            
+                        </div>
+
+
+                        {/each}
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="language-bars">
 
-            <div class="language-bar center-diverging-bar">
-                <div class="lang-half left-from-center" style="width: 16%; background: {getColor('Python')};">
+        <!-- <div class="language-bars"> -->
+
+            <!-- <div class="language-bar center-diverging-bar">
+                <div class="lang-half left-from-center" style="width: 34000px; background: {getColor('Python')};">
                     <span class="lang-label left">Python</span>
                 </div>
                 
-                <div class="lang-half right-from-center" style="width: 33%; background: {getColor('Python')};">
+                <div class="lang-half right-from-center" style="width: 20px; background: {getColor('Python')};">
                     <span class="lang-label right">Python</span>
                 </div>
                 <div class="center-divider"></div>
@@ -154,9 +248,9 @@
             <div class="line-count">
                 <h3 class={getWinner(200,400)}>200</h3>
                 <h3 class={getWinner(400,200)}>400</h3>
-            </div>
-            
-        </div>
+            </div> -->
+<!--             
+        </div> -->
     </main>
 {:catch error}
     <p>Error loading user data: {error.message}</p>
@@ -168,21 +262,34 @@
         flex-direction: row;
         height: 100%;
     }
-    .user1{
+    .user1, .user2 {
         display: flex;
         width: 50%;
         height: 100%;
         justify-content: center;
         align-items: center;
     }
-    .user2{
-        display:flex;
-        float: right;
-        width: 50%;
-
-        justify-content: center;
+    .user1 > div, .user2 > div {
+        display: flex;
+        flex-direction: column;
         align-items: center;
-        height: 100%;
+        justify-content: center;
+        width: 100%;
+    }
+    .user1 h1, .user2 h1 {
+        text-align: center;
+        width: 100%;
+    }
+    .user-stats {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #f1e05a;
+        font-size: 1.2em;
+        margin-top: 0.5em;
+        width: 100%;
+        text-align: center;
     }
     .more-lines{
         color: #4CAF50; /* Green */
@@ -328,6 +435,15 @@
         }
         
     }
+    .user-stats{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #f1e05a;
+        font-size: 1.2em;
+        margin-top: 0.5em;
+    }
 
     .nav-bar {
         width: 100%;
@@ -381,5 +497,48 @@
             background-position: 0 0;
         }
     }
-    
+    .language-single-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(40, 40, 50, 0.85);
+        border-radius: 10px;
+        margin: 0.5em 0;
+        padding: 0.7em 1.2em;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+        min-width: 120px;
+        max-width: 320px;
+        width: 100%;
+        border: 2px solid #232526;
+        transition: box-shadow 0.2s;
+    }
+    .language-single-stat h3 {
+        color: #f1e05a;
+        font-size: 1.1em;
+        margin-bottom: 0.2em;
+        margin-top: 0;
+        text-align: center;
+    }
+    .language-single-stat h4 {
+        color: #fff;
+        font-size: 1em;
+        margin: 0.1em 0;
+        text-align: center;
+    }
+    .language-single-stat h1 {
+        font-size: 1.3em;
+        margin: 0.2em 0 0 0;
+        text-align: center;
+    }
+    .user-stats {
+        gap: 0.5em;
+    }
+    @media (max-width: 900px) {
+        .language-single-stat {
+            min-width: 90px;
+            max-width: 98vw;
+            padding: 0.5em 0.5em;
+        }
+    }
 </style>
