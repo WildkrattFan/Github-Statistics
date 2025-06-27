@@ -27,4 +27,11 @@
         .footer-content a:hover {
             text-decoration: underline;
         }
+        @media (max-width: 600px) {
+            .footer-content {
+                font-size: 12px;
+                min-width: 100%;
+                overflow-x: hidden;
+            }
+        }
         </style>

@@ -506,6 +506,16 @@
     }
 
     @media (max-width: 600px) {
+        .nav-bar{
+            overflow-x: hidden;
+            max-width: 100vw ;
+                        padding-top: 0.5em;
+        }
+        main{
+
+            width: 100;
+            overflow-x: hidden;
+        }
         .card {
             padding: 1rem;
             width: 100%;
@@ -514,7 +524,7 @@
         }
         .userHeader {
             flex-direction: column;
-            align-items: flex-start;
+
             gap: 0.5rem;
         }
         .avatar {
@@ -554,12 +564,7 @@
             font-size: 1rem;
             margin-bottom: 0.5rem;
         }
-        .nav-bar {
-            flex-direction: column;
-            gap: 1em;
-            padding: 0.5em 0.5em;
-            font-size: 1rem;
-        }
+
         .home-link {
             font-size: 1.2em;
         }
@@ -588,7 +593,7 @@
     .nav-bar {
         width: 100%;
         background: #232526;
-        padding: 1em;
+
         font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
             "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
         font-weight: bold;

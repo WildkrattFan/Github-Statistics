@@ -131,17 +131,19 @@
     text-align: center;
   }
   @media (max-width: 600px) {
-    .card, .main-box {
-      padding: 1rem;
-      min-width: unset;
-      max-width: 98vw;
+    main {
+
+      gap: 1rem;
+      width: 100% !important;
+      overflow-x: hidden !important;
     }
+
     .main-header {
       font-size: 1.3rem;
     }
     #search-query {
       font-size: 1rem;
-      max-width: 98vw;
+      max-width: 80vw;
     }
   }
 </style>

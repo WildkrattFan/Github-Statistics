@@ -417,11 +417,16 @@
 
 
     @media (max-width: 600px) {
+        main{
+
+            width: 100%;
+            overflow-x: hidden;
+        }
         
         .nav-bar {
             flex-direction: column;
-            gap: 1em;
-            padding: 0.5em 0.5em;
+
+            padding-top: 0.5em;
             font-size: 1rem;
         }
         .home-link {
@@ -459,7 +464,7 @@
     .nav-bar {
         width: 100%;
         background: #232526;
-        padding: 1em;
+
         font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
             "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
         font-weight: bold;
