@@ -3,10 +3,13 @@
     import type { LayoutData } from './$types';
     import Footer from '$lib/components/Footer.svelte';
     import { injectAnalytics } from '@vercel/analytics/sveltekit'
+    import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+
 
 
     let { data, children }: { data: LayoutData, children: Snippet } = $props();
     injectAnalytics();
+    injectSpeedInsights();
 </script>
 
 <div class="parrentBody">
